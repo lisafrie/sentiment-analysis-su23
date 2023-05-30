@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 /*
@@ -16,7 +15,7 @@ public class Analyzer {
 		
 	}
 	
-	public static Set<Sentence> readFile(String filename) throws IllegalArgumentException, IOException {
+	public static Set<Sentence> readFile(String filename) {
 		// implement this method in Part 1
 
 		if (filename == null) {
@@ -25,18 +24,21 @@ public class Analyzer {
 
 		Set<Sentence> result = new HashSet<Sentence>();
 		
-		BufferedReader br = new BufferedReader(new FileReader(filename));
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filename));
+			String strLine;
 
-		String strLine;
-
-		//Read File Line By Line
-		while ((strLine = br.readLine()) != null)   {
-			Sentence sentence = createSentence(strLine);
-			if (sentence != null) {
-				result.add(sentence);
+			//Read File Line By Line
+			while ((strLine = br.readLine()) != null)   {
+				Sentence sentence = createSentence(strLine);
+				if (sentence != null) {
+					result.add(sentence);
+				}
 			}
-		}
-		br.close();	
+			br.close();
+		} catch (Exception e) {
+			throw new IllegalArgumentException("File cannot be opened for reading");
+		}			
 
 		return result;
 	}
@@ -66,7 +68,6 @@ public class Analyzer {
 			return null;
 		 }
 
-		
 	}
 
 
@@ -82,16 +83,15 @@ public class Analyzer {
 		Map<String, Integer> wordCounts = new HashMap<>();
 		Map<String, Double> result = new HashMap<>();
 
-		// If the input Set of Sentences is non-null and non-empty, then the method should ignore (and not consider for calculation) any Sentence objects in the Set for which necessary data is missing or invalid. 
-		// It is up to you to determine what “missing or invalid” means! Refer back to the issues from discussions and assignments on defensive programming and the situations that you needed to handle.
-
 		for (Sentence sentence : sentences) {
-			StringTokenizer st = new StringTokenizer(sentence.getText());
-			while (st.hasMoreTokens()) {
-				String word = st.nextToken().toLowerCase();
-				if (word.matches("^[a-z].*")) {
-					wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
-					result.put(word, result.getOrDefault(word, 0.0) + sentence.getScore());
+			if (sentence.getScore() >= -2 && sentence.getScore() <= 2) {
+				StringTokenizer st = new StringTokenizer(sentence.getText());
+				while (st.hasMoreTokens()) {
+					String word = st.nextToken().toLowerCase();
+					if (word.matches("^[a-z].*")) {
+						wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
+						result.put(word, result.getOrDefault(word, 0.0) + sentence.getScore());
+					}
 				}
 			}
 		}
@@ -164,11 +164,7 @@ public class Analyzer {
 		} catch (IllegalArgumentException e) {
 			System.out.println("bad input file");
 			return;
-		} catch (IOException e) {
-			System.out.println("bad input file");
-			return;
 		}
-		 
 	}
 	
 	// don't forget to write your JUnit tests for Part 5!
